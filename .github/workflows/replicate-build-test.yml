@@ -30,6 +30,7 @@ jobs:
         with:
           cog-version: "v0.12.1"    # Use newer version that supports --remote flag
           token: ${{ secrets.REPLICATE_CLI_AUTH_TOKEN }}
+          install-cuda: true        # Install CUDA drivers for GPU builds
 
       - name: Push to Replicate
         run: |

@@ -1,6 +1,6 @@
 build:
   gpu: true
-  cuda: "12.2"                # Pin CUDA version to match PyTorch wheel
+  cuda: "12.1"                # Use CUDA 12.1 instead of 12.2 for better compatibility
   python_version: "3.11"
   python_requirements: requirements.txt
   system_packages:
@@ -18,9 +18,9 @@ build:
     - export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
     - export TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0"
     # Install PyTorch + extra CUDA wheels ahead-of-time to speed up cold-starts
-    - pip install --extra-index-url https://download.pytorch.org/whl/cu122 torch torchvision
-    # Example: install spconv wheel compiled for CUDA 12.2 (optional, comment out if not needed)
-    #- pip install spconv-cu122
+    - pip install --extra-index-url https://download.pytorch.org/whl/cu121 torch torchvision
+    # Example: install spconv wheel compiled for CUDA 12.1 (optional, comment out if not needed)
+    #- pip install spconv-cu121
 
 # The entrypoint for Replicate
 predict: "predict.py:Predictor" 
