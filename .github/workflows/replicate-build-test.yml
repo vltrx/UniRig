@@ -1,0 +1,17 @@
+name: Replicate build test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: replicate/setup-replicate@v1
+      - name: Validate Cog build (digest-only)
+        run: cog build --remote --digest-only 

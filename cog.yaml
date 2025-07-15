@@ -1,0 +1,26 @@
+build:
+  gpu: true
+  cuda: "12.2"                # Pin CUDA version to match PyTorch wheel
+  python_version: "3.11"
+  python_requirements: requirements.txt
+  system_packages:
+    - git
+    - git-lfs
+    - ffmpeg
+    - libgl1-mesa-glx            # OpenGL runtime for trimesh/Open3D
+    - build-essential            # allows compiling CUDA/C++ extensions
+  run:
+    # Expose toolkit paths & common env vars during build so any extensions compile correctly
+    - echo "## Setting CUDA environment vars during build ##"
+    - export CUDA_HOME=/usr/local/cuda
+    - echo "CUDA_HOME set to $CUDA_HOME"
+    - export PATH=$CUDA_HOME/bin:$PATH
+    - export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+    - export TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0"
+    # Install PyTorch + extra CUDA wheels ahead-of-time to speed up cold-starts
+    - pip install --extra-index-url https://download.pytorch.org/whl/cu122 torch torchvision
+    # Example: install spconv wheel compiled for CUDA 12.2 (optional, comment out if not needed)
+    #- pip install spconv-cu122
+
+# The entrypoint for Replicate
+predict: "predict.py:Predictor" 
