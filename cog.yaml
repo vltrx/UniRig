@@ -10,6 +10,7 @@ build:
     - libgomp1
     - wget
     - build-essential
+    - ninja-build  # Required for Flash Attention
     - git
     - git-lfs
     - ffmpeg
@@ -21,6 +22,11 @@ build:
     - echo "Setting up CUDA environment..." && export CUDA_HOME=/usr/local/cuda && export PATH=${CUDA_HOME}/bin:${PATH} && export LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
     # Install PyTorch with CUDA 12.1 support
     - pip install --extra-index-url https://download.pytorch.org/whl/cu121 torch torchvision
+    # Install build dependencies
+    - echo "Installing build dependencies..." && pip install --upgrade pip setuptools wheel
+    # Install Flash Attention with proper dependencies
+    - echo "Installing Flash Attention..." && pip install packaging ninja
+    - pip install flash-attn==2.8.1 --no-build-isolation
     # Set environment variables for consistent behavior
     - export TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0" && export OMP_NUM_THREADS=1
 
