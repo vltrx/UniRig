@@ -8,8 +8,8 @@ addict
 timm
 fast-simplification
 bpy==4.2
-trimesh
-open3d
-pyrender
-huggingface_hub
-numpy==1.26.4
+# torch_cluster - moved to cog.yaml
+# torch_scatter - moved to cog.yaml  
+# torch_sparse - moved to cog.yaml
+# torch_geometric - moved to cog.yaml
+# flash_attn - moved to cog.yaml
