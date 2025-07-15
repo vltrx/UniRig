@@ -1,26 +1,27 @@
 build:
   gpu: true
-  cuda: "12.1"                # Use CUDA 12.1 instead of 12.2 for better compatibility
+  cuda: "12.1"  # Use 12.1 instead of 12.2 for better compatibility
   python_version: "3.11"
-  python_requirements: requirements.txt
+  python_requirements: "requirements.txt"
+  
   system_packages:
+    - libgl1-mesa-glx
+    - libglib2.0-0
+    - libgomp1
+    - wget
+    - build-essential
     - git
     - git-lfs
     - ffmpeg
-    - libgl1-mesa-glx            # OpenGL runtime for trimesh/Open3D
-    - build-essential            # allows compiling CUDA/C++ extensions
-  run:
-    # Expose toolkit paths & common env vars during build so any extensions compile correctly
-    - echo "## Setting CUDA environment vars during build ##"
-    - export CUDA_HOME=/usr/local/cuda
-    - echo "CUDA_HOME set to $CUDA_HOME"
-    - export PATH=$CUDA_HOME/bin:$PATH
-    - export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
-    - export TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0"
-    # Install PyTorch + extra CUDA wheels ahead-of-time to speed up cold-starts
-    - pip install --extra-index-url https://download.pytorch.org/whl/cu121 torch torchvision
-    # Example: install spconv wheel compiled for CUDA 12.1 (optional, comment out if not needed)
-    #- pip install spconv-cu121
 
-# The entrypoint for Replicate
+  run:
+    # Download pget for faster downloads
+    - curl -o /usr/local/bin/pget -L "https://github.com/replicate/pget/releases/latest/download/pget_$(uname -s)_$(uname -m)" && chmod +x /usr/local/bin/pget
+    # Set up CUDA environment
+    - echo "Setting up CUDA environment..." && export CUDA_HOME=/usr/local/cuda && export PATH=${CUDA_HOME}/bin:${PATH} && export LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+    # Install PyTorch with CUDA 12.1 support
+    - pip install --extra-index-url https://download.pytorch.org/whl/cu121 torch torchvision
+    # Set environment variables for consistent behavior
+    - export TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0" && export OMP_NUM_THREADS=1
+
 predict: "predict.py:Predictor" 

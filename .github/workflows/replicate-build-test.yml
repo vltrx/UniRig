@@ -4,17 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       model_name:
-        description: "Model name to push"
-        required: true
+        description: "Model name to push (e.g., username/model-name)"
+        required: false
         default: "vltrx/unirig"
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   push_to_replicate:
     name: Push to Replicate
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Free disk space
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -28,9 +29,8 @@ jobs:
       - name: Setup Cog
         uses: replicate/setup-cog@v2
         with:
-          cog-version: "v0.12.1"    # Use newer version that supports --remote flag
+          cog-version: "v0.12.1"
           token: ${{ secrets.REPLICATE_CLI_AUTH_TOKEN }}
-          install-cuda: true        # Install CUDA drivers for GPU builds
 
       - name: Push to Replicate
         run: |
