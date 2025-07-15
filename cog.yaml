@@ -19,6 +19,6 @@ build:
     - echo "Installing PyTorch ecosystem..." && pip install --upgrade pip setuptools wheel packaging ninja
     - pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
     - pip install torch-cluster torch-scatter torch-sparse torch-geometric -f https://data.pyg.org/whl/torch-2.1.0+cu121.html
-    - pip install flash-attn==2.5.9 --no-build-isolation
+    - pip install flash-attn==2.5.8 --no-build-isolation
 
 predict: "predict.py:Predictor" 
