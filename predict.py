@@ -35,20 +35,17 @@ def _ensure_model_loaded():
             import torch_sparse
             import torch_geometric
             
-            # Import other necessary modules
-            from src.system.ar import AutoRegressiveSystem
-            from src.system.skin import SkinningSystem
+            # Import UniRig modules
+            from src.system.ar import ARSystem
+            from src.system.skin import SkinSystem
             
-            # Load your actual model here
-            print("Loading skeleton generation model...")
-            skeleton_model = AutoRegressiveSystem.load_from_checkpoint("path/to/skeleton/model")
-            
-            print("Loading skinning model...")
-            skin_model = SkinningSystem.load_from_checkpoint("path/to/skin/model")
-            
+            # For now, create a placeholder model pipeline
+            # This will need to be replaced with actual model loading
+            print("UniRig system modules loaded successfully")
             model_pipeline = {
-                'skeleton': skeleton_model,
-                'skin': skin_model
+                'ar_system': ARSystem,
+                'skin_system': SkinSystem,
+                'status': 'loaded'
             }
             
             print("Model loaded successfully")
@@ -98,10 +95,11 @@ class Predictor(BasePredictor):
             models = _ensure_model_loaded()
             
             # Your prediction logic here
-            # result = models['skeleton'].generate(input_mesh, skeleton_type=skeleton_type, seed=seed)
-            # skinned_result = models['skin'].generate(result, input_mesh)
+            # This is where the actual UniRig inference would happen
+            # For now, return a placeholder
+            print(f"Processing {input_mesh} with {skeleton_type} skeleton (seed: {seed})")
             
-            # Placeholder - replace with actual prediction
+            # Placeholder - replace with actual UniRig pipeline
             output_path = Path("/tmp/output.glb")
             with open(output_path, "wb") as f:
                 f.write(b"Processed mesh data")  # Replace with actual processing
