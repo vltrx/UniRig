@@ -24,6 +24,10 @@ build:
     - pip install --extra-index-url https://download.pytorch.org/whl/cu121 torch torchvision
     # Install build dependencies
     - echo "Installing build dependencies..." && pip install --upgrade pip setuptools wheel
+    # Install PyTorch Geometric dependencies for CUDA 12.1
+    - echo "Installing PyTorch Geometric dependencies..." && pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.4.0+cu121.html --no-cache-dir || pip install torch_scatter torch_cluster -f https://data.pyg.org/whl/torch-2.3.0+cu121.html --no-cache-dir
+    # Install spconv for CUDA 12.1
+    - echo "Installing spconv..." && pip install spconv-cu121
     # Install Flash Attention with proper dependencies
     - echo "Installing Flash Attention..." && pip install packaging ninja
     - pip install flash-attn==2.8.1 --no-build-isolation

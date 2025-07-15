@@ -25,8 +25,67 @@ def setup_environment():
     os.environ["TORCH_CUDA_ARCH_LIST"] = "8.0;8.6;8.9;9.0"
     os.environ["OMP_NUM_THREADS"] = "1"
 
+def check_and_install_dependencies():
+    """Check for missing dependencies and install them if needed (runtime fallback)"""
+    missing_deps = []
+    
+    # Check for torch_cluster
+    try:
+        import torch_cluster
+    except ImportError:
+        missing_deps.append("torch_cluster")
+    
+    # Check for torch_scatter
+    try:
+        import torch_scatter
+    except ImportError:
+        missing_deps.append("torch_scatter")
+    
+    # Check for spconv
+    try:
+        import spconv
+    except ImportError:
+        missing_deps.append("spconv")
+    
+    if missing_deps:
+        print(f"Missing dependencies detected: {missing_deps}")
+        print("Attempting to install missing dependencies...")
+        
+        # Get torch version for PyTorch Geometric
+        torch_version = torch.__version__.split("+")[0]
+        cuda_version = torch.version.cuda
+        
+        if cuda_version:
+            cuda_version = f"cu{cuda_version.replace('.', '')}"
+        else:
+            cuda_version = "cpu"
+        
+        try:
+            # Install PyTorch Geometric dependencies
+            if "torch_cluster" in missing_deps or "torch_scatter" in missing_deps:
+                pyg_deps = [dep for dep in missing_deps if dep in ["torch_cluster", "torch_scatter"]]
+                cmd = f"pip install {' '.join(pyg_deps)} -f https://data.pyg.org/whl/torch-{torch_version}+{cuda_version}.html --no-cache-dir"
+                print(f"Installing PyTorch Geometric dependencies: {cmd}")
+                subprocess.run(cmd, shell=True, check=True)
+            
+            # Install spconv
+            if "spconv" in missing_deps:
+                spconv_version = f"-{cuda_version}" if cuda_version != "cpu" else ""
+                cmd = f"pip install spconv{spconv_version}"
+                print(f"Installing spconv: {cmd}")
+                subprocess.run(cmd, shell=True, check=True)
+                
+            print("Successfully installed missing dependencies")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Warning: Failed to install some dependencies: {e}")
+            print("Continuing with available dependencies...")
+
 # Call immediately so downstream imports see the vars
 setup_environment()
+
+# Check and install dependencies if needed
+check_and_install_dependencies()
 
 # -----------------------------------------------------------------------------
 # Global variables for lazy loading (Hunyuan3D style)
