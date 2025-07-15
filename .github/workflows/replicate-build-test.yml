@@ -1,17 +1,40 @@
-name: Replicate build test
+name: Push to Replicate
 
 on:
+  workflow_dispatch:
+    inputs:
+      model_name:
+        description: "Model name to push"
+        required: true
+        default: "vltrx/unirig"
   push:
-    branches: [ main ]
-  pull_request:
+    branches: [main]
 
 jobs:
-  build:
+  push_to_replicate:
+    name: Push to Replicate
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: replicate/setup-cog@v2
-      - name: Validate Cog build (digest-only)
-        run: cog build --remote --digest-only 
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          docker-images: false
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Cog
+        uses: replicate/setup-cog@v2
+        with:
+          cog-version: "v0.12.1"    # Use newer version that supports --remote flag
+          token: ${{ secrets.REPLICATE_CLI_AUTH_TOKEN }}
+
+      - name: Push to Replicate
+        run: |
+          if [ -n "${{ github.event.inputs.model_name }}" ]; then
+            cog push r8.im/${{ github.event.inputs.model_name }}
+          else
+            cog push r8.im/vltrx/unirig
+          fi 
