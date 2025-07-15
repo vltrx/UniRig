@@ -12,6 +12,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: replicate/setup-replicate@v1
+      - uses: replicate/setup-cog@v2
       - name: Validate Cog build (digest-only)
         run: cog build --remote --digest-only 
