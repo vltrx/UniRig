@@ -299,6 +299,11 @@ class Predictor(BasePredictor):
             choices=["articulationxl", "vroid"], 
             default="articulationxl"
         ),
+        output_format: str = Input(
+            description="Output file format",
+            choices=["glb", "fbx", "obj", "gltf", "ply", "dae"],
+            default="glb"
+        ),
         seed: int = Input(description="Random seed", default=42),
     ) -> Output:
         """Run UniRig prediction pipeline"""
@@ -323,7 +328,7 @@ class Predictor(BasePredictor):
             
             # Step 1: Generate skeleton
             intermediate_skeleton_file = work_dir / f"{file_stem}_skeleton.fbx"
-            final_skeleton_file = work_dir / f"{file_stem}_skeleton_only{input_file.suffix}"
+            final_skeleton_file = work_dir / f"{file_stem}_skeleton_only.{output_format}"
             
             run_inference_python(
                 str(input_file), 
@@ -341,7 +346,7 @@ class Predictor(BasePredictor):
             
             # Step 2: Generate skinning
             intermediate_skin_file = work_dir / f"{file_stem}_skin.fbx"
-            final_skin_file = work_dir / f"{file_stem}_skeleton_and_skinning{input_file.suffix}"
+            final_skin_file = work_dir / f"{file_stem}_skeleton_and_skinning.{output_format}"
             
             run_inference_python(
                 str(intermediate_skeleton_file), 
