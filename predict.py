@@ -209,7 +209,12 @@ def run_inference_python(
             if alt_files:
                 actual_output_file = alt_files[0]
             else:
-                raise RuntimeError(f"Skeleton FBX file not found. Expected at: {actual_output_file}")
+                # Check if this is a vroid skeleton type failure
+                error_msg = f"Skeleton FBX file not found. Expected at: {actual_output_file}"
+                if skeleton_type == "vroid":
+                    error_msg += "\n\nThe 'vroid' skeleton type requires more bones than this model can generate. "
+                    error_msg += "Try using 'articulationxl' skeleton type instead, which works with more diverse mesh types."
+                raise RuntimeError(error_msg)
         
         if actual_output_file != Path(output_file):
             shutil.copy2(actual_output_file, output_file)
@@ -295,7 +300,7 @@ class Predictor(BasePredictor):
         self,
         input_mesh: CogPath = Input(description="Input 3D mesh file (.glb, .fbx, .obj)"),
         skeleton_type: str = Input(
-            description="Skeleton type to generate", 
+            description="Skeleton type to generate:\n• 'articulationxl' - Generic bone names, works with most mesh types\n• 'vroid' - Detailed VRoid-style bones, may not work with all meshes", 
             choices=["articulationxl", "vroid"], 
             default="articulationxl"
         ),
@@ -326,23 +331,49 @@ class Predictor(BasePredictor):
             
             print(f"Running UniRig pipeline with {skeleton_type} skeleton type (seed: {seed})")
             
-            # Step 1: Generate skeleton
-            intermediate_skeleton_file = work_dir / f"{file_stem}_skeleton.fbx"
-            final_skeleton_file = work_dir / f"{file_stem}_skeleton_only.{output_format}"
-            
-            run_inference_python(
-                str(input_file), 
-                str(intermediate_skeleton_file), 
-                "skeleton", 
-                seed, 
-                skeleton_type=skeleton_type
-            )
-            
-            merge_results_python(
-                str(intermediate_skeleton_file), 
-                str(input_file), 
-                str(final_skeleton_file)
-            )
+            try:
+                # Step 1: Generate skeleton
+                intermediate_skeleton_file = work_dir / f"{file_stem}_skeleton.fbx"
+                final_skeleton_file = work_dir / f"{file_stem}_skeleton_only.{output_format}"
+                
+                run_inference_python(
+                    str(input_file), 
+                    str(intermediate_skeleton_file), 
+                    "skeleton", 
+                    seed, 
+                    skeleton_type=skeleton_type
+                )
+                
+                merge_results_python(
+                    str(intermediate_skeleton_file), 
+                    str(input_file), 
+                    str(final_skeleton_file)
+                )
+                
+            except RuntimeError as e:
+                if "vroid" in str(e).lower() and "more bones" in str(e).lower():
+                    # This is a vroid skeleton type compatibility issue
+                    print(f"VRoid skeleton generation failed: {e}")
+                    print("Automatically falling back to articulationxl skeleton type...")
+                    
+                    # Retry with articulationxl skeleton type
+                    run_inference_python(
+                        str(input_file), 
+                        str(intermediate_skeleton_file), 
+                        "skeleton", 
+                        seed, 
+                        skeleton_type="articulationxl"
+                    )
+                    
+                    merge_results_python(
+                        str(intermediate_skeleton_file), 
+                        str(input_file), 
+                        str(final_skeleton_file)
+                    )
+                    
+                    print("Successfully generated skeleton using articulationxl type as fallback")
+                else:
+                    raise  # Re-raise other errors
             
             # Step 2: Generate skinning
             intermediate_skin_file = work_dir / f"{file_stem}_skin.fbx"
